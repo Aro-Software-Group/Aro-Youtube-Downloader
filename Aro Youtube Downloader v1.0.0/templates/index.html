@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aro YouTube ダウンローダー</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fab fa-youtube"></i> Aro YouTube ダウンローダー</h1>
+            <p>YouTubeの動画や音声を簡単にダウンロード</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="input-section">
+            <h2>URLを入力</h2>
+            <div class="url-input-container">
+                <input type="text" id="video-url" placeholder="YouTube URLを入力してください" class="url-input">
+                <button id="fetch-info" class="btn primary-btn"><i class="fas fa-search"></i> 情報取得</button>
+            </div>
+            <div class="batch-download-toggle">
+                <button id="toggle-batch" class="btn secondary-btn"><i class="fas fa-list"></i> 一括ダウンロードモード</button>
+            </div>
+            <div id="batch-input-container" class="batch-input-container hidden">
+                <h3>複数のURLを入力</h3>
+                <textarea id="batch-urls" placeholder="複数のYouTube URLを改行で区切って入力してください" rows="5"></textarea>
+                <div class="batch-options">
+                    <div class="option-group">
+                        <label>タイプ:</label>
+                        <select id="batch-type">
+                            <option value="video">動画 (MP4)</option>
+                            <option value="audio">音声のみ (MP3)</option>
+                        </select>
+                    </div>
+                    <div class="option-group" id="batch-resolution-group">
+                        <label>解像度:</label>
+                        <select id="batch-resolution">
+                            <option value="best">最高品質</option>
+                            <option value="1080p">1080p</option>
+                            <option value="720p">720p</option>
+                            <option value="480p">480p</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="start-batch-download" class="btn primary-btn"><i class="fas fa-download"></i> 一括ダウンロード開始</button>
+                <div id="batch-progress" class="progress-container hidden">
+                    <div class="progress-info">
+                        <span id="batch-current">0</span>/<span id="batch-total">0</span> 完了
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="batch-progress-bar" class="progress-bar"></div>
+                    </div>
+                </div>
+                <div id="batch-results" class="batch-results hidden">
+                    <h3>ダウンロード結果</h3>
+                    <ul id="batch-results-list"></ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="video-info" class="video-info hidden">
+            <div class="video-preview">
+                <div class="thumbnail-container">
+                    <img id="video-thumbnail" src="" alt="サムネイル">
+                    <div class="play-button"><i class="fas fa-play"></i></div>
+                </div>
+                <div class="video-details">
+                    <h2 id="video-title"></h2>
+                    <p id="video-duration"></p>
+                </div>
+            </div>
+            
+            <div class="download-options">
+                <h3>ダウンロードオプション</h3>
+                
+                <div class="option-tabs">
+                    <button class="tab-btn active" data-tab="video-tab">動画 (MP4)</button>
+                    <button class="tab-btn" data-tab="audio-tab">音声のみ (MP3)</button>
+                </div>
+                
+                <div id="video-tab" class="tab-content active">
+                    <div class="option-group">
+                        <label>解像度を選択:</label>
+                        <select id="video-resolution">
+                            <!-- 動的に生成されます -->
+                        </select>
+                    </div>
+                    <button id="download-video" class="btn primary-btn"><i class="fas fa-download"></i> 動画をダウンロード</button>
+                </div>
+                
+                <div id="audio-tab" class="tab-content">
+                    <p>最高品質の音声をMP3形式でダウンロードします。</p>
+                    <button id="download-audio" class="btn primary-btn"><i class="fas fa-music"></i> 音声をダウンロード</button>
+                </div>
+            </div>
+            
+            <div id="download-progress" class="progress-container hidden">
+                <h3>ダウンロード中...</h3>
+                <div class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <p id="progress-status">準備中...</p>
+            </div>
+            
+            <div id="download-complete" class="download-complete hidden">
+                <h3>ダウンロード完了！</h3>
+                <p id="download-file-name"></p>
+                <a id="download-link" class="btn primary-btn" href="#" download><i class="fas fa-file-download"></i> ファイルを保存</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Aro YouTube ダウンローダーについて</h3>
+                    <p>このツールはYouTube動画を簡単にダウンロードするためのサービスです。</p>
+                </div>
+                <div class="footer-section">
+                    <h3>利用規約</h3>
+                    <p>自由に使用してください！</p>
+                </div>
+                <div class="footer-section">
+                    <h3>プライバシーポリシー</h3>
+                    <p>個人情報は収集しません。</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; Aro Software Group</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>処理中...</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
